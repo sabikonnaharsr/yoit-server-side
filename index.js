@@ -22,11 +22,18 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 // 
 async function run(){
     try{
-        // collection
+        // collection all product
         const allProduct = client.db('bytecodeVelocity').collection('productCollection');
-        const threeCategory = client.db('bytecodeVelocity').collection('threeCollection');
-        const bookingsCollection = client.db('bytecodeVelocity').collection('bookings')
 
+        // three category collection
+        const threeCategory = client.db('bytecodeVelocity').collection('threeCollection');
+
+
+        // booking collection
+        const bookingsCollection = client.db('bytecodeVelocity').collection('bookings')
+    
+
+        // wishlist collection
         const wishlistsCollections = client.db('bytecodeVelocity').collection('wishlists')
 
        
@@ -40,6 +47,8 @@ async function run(){
         //     res.send({accessToken: 'token'});
         // })
 
+
+        // all product
         app.get('/productCollection', async(req, res) => {
             const query = {}
             const result = await allProduct.find(query).toArray();
@@ -47,13 +56,15 @@ async function run(){
         })
 
 
+        // category home collection
         app.get('/threeCollection', async(req, res) => {
             const query = {};
             const result = await threeCategory.find(query).toArray();
             res.send(result);
         })
 
-
+        
+        // category id
         app.get('/categories/:id', async(req, res) => {
             const id = req.params.id;
             const filter = {_id: ObjectId(id)};
@@ -63,7 +74,8 @@ async function run(){
             res.send(result);
         })
 
-
+      
+        // product details
         app.get('/productDetails/:id', async(req, res) => {
             const id = req.params.id;
             const query = {_id: ObjectId(id)};
@@ -72,6 +84,7 @@ async function run(){
         })
 
 
+        // booking products
         app.post('/bookings', async(req, res) => {
             const booking = req.body;
             console.log(booking)
@@ -107,11 +120,16 @@ async function run(){
             res.send(wishlistProduct)
         })
 
+
+        // add to wishlist
         app.get('/get-wishlist', async(req, res) => {
             const query = {};
             const result = await wishlistsCollections.find(query).toArray();
             res.send(result);
         })
+
+
+
 
 
         
