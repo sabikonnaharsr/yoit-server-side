@@ -24,7 +24,7 @@ async function run(){
         // collection
         const allProduct = client.db('bytecodeVelocity').collection('productCollection');
         const threeCategory = client.db('bytecodeVelocity').collection('threeCollection');
-        // const usersCollection = client.db('doctorsPortal').collection('users')
+        const bookingsCollection = client.db('doctorsPortal').collection('bookings')
 
        
         // jwt
@@ -69,9 +69,16 @@ async function run(){
         })
 
 
+        app.post('/bookings', async(req, res) => {
+            const booking = req.body;
+            console.log(booking)
+            const result = await bookingsCollection.insertOne(booking);
+            res.send(result);
+
+        })
+
+
         
-
-
 
     }finally{
 
