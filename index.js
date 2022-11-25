@@ -1,9 +1,9 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const jwt = require('jsonwebtoken')
-const port = process.env.PORT || 5000;
 require('dotenv').config();
+const port = process.env.PORT || 5000;
 
 const app = express();
 
@@ -22,91 +22,62 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 async function run(){
     try{
         // collection
-        const appointmentOptionCollection = client.db('bytecodeVelocity').collection('appointmentOption');
-        const bookingsCollection = client.db('bytecodeVelocity').collection('bookings')
-        const usersCollection = client.db('doctorsPortal').collection('users')
-
-
-        // read all data
-        app.get('/appointmentOption', async(req, res) => {
-            const query = {};
-            const options = await appointmentOptionCollection.find(query).toArray();
-            const bookingQuery = {appointmentDate: date}
-            const alreadyBooked =  await bookingsCollection.find(bookingQuery).toArray();
-           options.forEach(option => {
-                const optionBooked = alreadyBooked.filter(book => book.treatment === option.name);
-                const bookedSlots = optionBooked.map(book => book.slot);
-                const remainingSlots = option.slots.filter(slot => !bookedSlots.includes(slot))
-                option.slots= remainingSlots;
-                console.log(date, option.name, remainingSlots.length)
-            });
-            res.send(options);
-           })
-
+        const allProduct = client.db('bytecodeVelocity').collection('productCollection');
+        const threeCategory = client.db('bytecodeVelocity').collection('threeCollection');
+        // const usersCollection = client.db('doctorsPortal').collection('users')
 
        
         // jwt
-           app.get('/jwt', async(req, res) => {
-            const email = req.query.email;
-            const query = {email: email}
-            console.log(email);
-            const user = await usersCollection.findOne(query);
-            console.log(user)
-            res.send({accessToken: 'token'});
-        })
+        //    app.get('/jwt', async(req, res) => {
+        //     const email = req.query.email;
+        //     const query = {email: email}
+        //     console.log(email);
+        //     const user = await usersCollection.findOne(query);
+        //     console.log(user)
+        //     res.send({accessToken: 'token'});
+        // })
 
-
-    
-        // create new data
-        app.post('/bookings', async(req, res) => {
-            const booking = req.body;
-            console.log(booking)
-            const result = bookingsCollection.insertOne(booking);
+        app.get('/productCollection', async(req, res) => {
+            const query = {}
+            const result = await allProduct.find(query).toArray();
             res.send(result);
         })
 
 
-        app.get('/bookings', async(req, res) => {
-            const query = {}
-            const bookings = await bookingsCollection.find(query).toArray();
-            res.send(bookings);
+        app.get('/threeCollection', async(req, res) => {
+            const query = {};
+            const result = await threeCategory.find(query).toArray();
+            res.send(result);
         })
 
 
+        app.get('/categories/:id', async(req, res) => {
+            const id = req.params.id;
+            const filter = {_id: ObjectId(id)};
+            const category = await threeCategory.findOne(filter);
+            const query = {product_id: category.product_id};
+            const result= await allProduct.find(query).toArray();
+            res.send(result);
+        })
+
+
+        app.get('/productDetails/:id', async(req, res) => {
+            const id = req.params.id;
+            const query = {_id: ObjectId(id)};
+            const result = await allProduct.findOne(query);
+            res.send(result);
+        })
 
 
         
-         // get data 
-       app.post('/bookings', async (req, res) => {
-        const booking = req.body;
-        console.log(booking)
-        const query = {
-            appointmentDate: booking.appointmentDate,
-            treatment: booking.treatment
-        }
-        const alreadyBooked = await bookingsCollection.find(query).toArray();
-        if(alreadyBooked.length){
-            const message = `you already booked${booking.appointmentDate}`
-            return res.send({acknowledged: false, message})
-        }
-        const result = await bookingsCollection.insertOne(booking);
-        res.send(result)
-       })
 
-
-       //get data form users
-       app.post('/users', async(req, res) => {
-        const user = req.body;
-        const result = await usersCollection.insertOne(user);
-        res.send(result);
-       })
 
 
     }finally{
 
     }
 }
-run().catch(console.log)
+run().catch(console.dir)
 
 
 
@@ -121,3 +92,4 @@ app.listen(port, () => console.log(`byteCode velocity is running ${port}`))
 
 // "npm-start-dev": "nodemon index.js",
 // require('crypto').randomBytes(64).toString('hex')
+
