@@ -24,7 +24,7 @@ async function run(){
         // collection
         const allProduct = client.db('bytecodeVelocity').collection('productCollection');
         const threeCategory = client.db('bytecodeVelocity').collection('threeCollection');
-        const bookingsCollection = client.db('doctorsPortal').collection('bookings')
+        const bookingsCollection = client.db('bytecodeVelocity').collection('bookings')
 
        
         // jwt
