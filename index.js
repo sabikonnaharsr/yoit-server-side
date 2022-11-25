@@ -18,6 +18,7 @@ const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
 
+
 // 
 async function run(){
     try{
@@ -25,6 +26,8 @@ async function run(){
         const allProduct = client.db('bytecodeVelocity').collection('productCollection');
         const threeCategory = client.db('bytecodeVelocity').collection('threeCollection');
         const bookingsCollection = client.db('bytecodeVelocity').collection('bookings')
+
+        const wishlistsCollections = client.db('bytecodeVelocity').collection('wishlists')
 
        
         // jwt
@@ -72,9 +75,42 @@ async function run(){
         app.post('/bookings', async(req, res) => {
             const booking = req.body;
             console.log(booking)
+            const query = {
+                email: booking.email,
+                productId: booking.productId
+            }
+            const alreadyWishlist = await bookingsCollection.find(query).toArray();
+            if (alreadyWishlist.length) {
+                const message = `Already booking This product ${booking.itemName}`;
+                return res.send({ acknowledged: false, message })
+            }
             const result = await bookingsCollection.insertOne(booking);
             res.send(result);
 
+        })
+
+
+        //wishlist products add
+        app.post('/wishlist', async (req, res) => {
+            const wishlist = req.body;
+            const query = {
+                email: wishlist.email,
+                productId: wishlist.productId
+            }
+            const alreadyWishlist = await wishlistsCollections.find(query).toArray();
+            if (alreadyWishlist.length) {
+                const message = `Already wishlist This product ${wishlist.name}`;
+                return res.send({ acknowledged: false, message })
+            }
+
+            const wishlistProduct = await wishlistsCollections.insertOne(wishlist);
+            res.send(wishlistProduct)
+        })
+
+        app.get('/get-wishlist', async(req, res) => {
+            const query = {};
+            const result = await wishlistsCollections.find(query).toArray();
+            res.send(result);
         })
 
 
