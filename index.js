@@ -129,6 +129,13 @@ async function run(){
         })
 
 
+        // add product
+        app.post('/addProduct', async (req,res) => {
+            const productData = req.body;
+            const product = await allProduct.insertOne(productData);
+            res.send(product);
+        })
+
 
 
 
