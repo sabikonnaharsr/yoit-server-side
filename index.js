@@ -74,7 +74,9 @@ async function run(){
             res.send(result);
         })
 
-      
+ 
+
+                
         // product details
         app.get('/productDetails/:id', async(req, res) => {
             const id = req.params.id;
@@ -137,9 +139,57 @@ async function run(){
         })
 
 
-
-
         
+        // create a payment intent
+        app.post('/create-payment-intent',async(req,res)=>{
+            const price = req.body.price.resalePrice
+            const amount = price * 100
+            const paymentIntent = await stripe.paymentIntents.create({ 
+            currency: "usd",
+            amount: amount,
+            "payment_method_types": [
+                "card"
+        
+            ]
+            
+            });
+            res.send({
+            clientSecret: paymentIntent.client_secret,
+            });
+        })
+        
+        // payment data stored in database 
+        app.post('/payments',async(req,res)=>{
+            const payment = req.body
+        
+            // inject data in payment collectioon
+            const id = payment.product_id
+            const filter = {_id: ObjectId(id)}
+            const result = await paymentsCollection.insertOne(payment)  
+            const updatedDoc = {
+                $set:{
+                    
+                    sellStatus:"sold",
+                    
+                }
+                
+            }
+            const orders = {
+                productName : payment.name,
+                paymentStatus : true,
+                transactionId: payment.transactionId,
+                email: payment.email,
+                productId : id,
+                sellStatus:"sold",
+                price : payment.price 
+            }
+            const updatedProducts = await productsCollection.updateOne(filter,updatedDoc)
+        const updatedResult = await ordersCollection.insertOne(orders)      
+            res.send(result)
+        })
+
+
+ 
 
     }finally{
 
