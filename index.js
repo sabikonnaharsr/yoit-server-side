@@ -28,11 +28,9 @@ async function run(){
         // three category collection
         const threeCategory = client.db('bytecodeVelocity').collection('threeCollection');
 
-
         // booking collection
         const bookingsCollection = client.db('bytecodeVelocity').collection('bookings')
     
-
         // wishlist collection
         const wishlistsCollections = client.db('bytecodeVelocity').collection('wishlists')
 
@@ -129,6 +127,52 @@ async function run(){
             const result = await wishlistsCollections.find(query).toArray();
             res.send(result);
         })
+
+        //  addvertise
+        app.get("/update", async (req, res) => {
+            const filter = {};
+            const option = { upsert: true };
+            const updateDoc = {
+              $set: {
+                advertiseShow: false,
+                status: "available",
+                email: "sabion@gmail.com"
+              },
+            };
+            const result = await allProduct.updateMany(
+              filter,
+              updateDoc,
+              option
+            );
+      
+            res.send(result);
+          });
+
+
+        //   adveritse get data
+        app.get("/advertise-products/:email", async (req, res) => {
+            const email = req.params.email;
+            console.log(email)
+            const result = await allProduct
+              .find({
+                email: email,
+                advertiseShow: true,
+                status: "available",
+              })
+              .toArray();
+            res.send(result);
+          });
+
+
+        // fkkf
+        // app.get('/myproducts', async (req, res) => {
+        //     const email = req.query.email;
+        //     const query = { email: email };
+        //     const result = await allProduct.find(query).toArray();
+        //     res.send(result);
+        // })
+
+
 
 
         // add product
