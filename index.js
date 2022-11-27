@@ -33,6 +33,8 @@ async function run(){
     
         // wishlist collection
         const wishlistsCollections = client.db('bytecodeVelocity').collection('wishlists')
+        // users
+        const usersCollections = client.db('bytecodeVelocity').collection('users')
 
        
         // jwt
@@ -128,7 +130,8 @@ async function run(){
             res.send(result);
         })
 
-        //  addvertise
+
+        //  advertise
         app.get("/update", async (req, res) => {
             const filter = {};
             const option = { upsert: true };
@@ -149,13 +152,14 @@ async function run(){
           });
 
 
-        //   adveritse get data
-        app.get("/advertise-products/:email", async (req, res) => {
-            const email = req.params.email;
-            console.log(email)
+
+        //   advertise get data
+        app.get("/advertise-products", async (req, res) => {
+            // const email = req.params.email;
+            // console.log(email)
             const result = await allProduct
               .find({
-                email: email,
+                // email: email,
                 advertiseShow: true,
                 status: "available",
               })
@@ -164,13 +168,14 @@ async function run(){
           });
 
 
+
         // fkkf
-        // app.get('/myproducts', async (req, res) => {
-        //     const email = req.query.email;
-        //     const query = { email: email };
-        //     const result = await allProduct.find(query).toArray();
-        //     res.send(result);
-        // })
+        app.get('/myproducts', async (req, res) => {
+            const email = req.query.email;
+            const query = { email: email };
+            const result = await allProduct.find(query).toArray();
+            res.send(result);
+        })
 
 
 
@@ -181,6 +186,26 @@ async function run(){
             const product = await allProduct.insertOne(productData);
             res.send(product);
         })
+
+
+        // add users
+        app.post('/users', async (req,res) => {
+            const productData = req.body;
+            const product = await usersCollections.insertOne(productData);
+            res.send(product);
+        })
+
+
+        // admin route
+        app.get('/users/admin/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = {email}
+            const user = await usersCollections.findOne(query);
+       
+            const accountType = user.accountType
+            res.send(accountType);
+        })
+
 
 
         
@@ -201,6 +226,8 @@ async function run(){
             clientSecret: paymentIntent.client_secret,
             });
         })
+
+
         
         // payment data stored in database 
         app.post('/payments',async(req,res)=>{
