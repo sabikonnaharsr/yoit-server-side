@@ -11,7 +11,7 @@ const app = express();
 // middleware 
 app.use(cors());
 app.use(express.json());
-
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 //db user
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.svbs0rh.mongodb.net/?retryWrites=true&w=majority`;
@@ -35,15 +35,17 @@ async function run(){
         const wishlistsCollections = client.db('bytecodeVelocity').collection('wishlists')
         // users
         const usersCollections = client.db('bytecodeVelocity').collection('users')
+        // 
+        const paymentCollections = client.db('bytecodeVelocity').collection('payment')
 
        
         // jwt
         //    app.get('/jwt', async(req, res) => {
         //     const email = req.query.email;
         //     const query = {email: email}
-        //     console.log(email);
+        //    
         //     const user = await usersCollection.findOne(query);
-        //     console.log(user)
+        //     
         //     res.send({accessToken: 'token'});
         // })
 
@@ -89,7 +91,7 @@ async function run(){
         // booking products
         app.post('/bookings', async(req, res) => {
             const booking = req.body;
-            console.log(booking)
+        
             const query = {
                 email: booking.email,
                 productId: booking.productId
@@ -131,13 +133,15 @@ async function run(){
         })
 
 
+
         //  advertise
-        app.get("/update", async (req, res) => {
+        app.get("/update/:id", async (req, res) => {
+            const email = req.params.id;
             const filter = {};
             const option = { upsert: true };
             const updateDoc = {
               $set: {
-                advertiseShow: false,
+                advertiseShow: true,
                 status: "available",
                 email: "sabion@gmail.com"
               },
@@ -152,11 +156,10 @@ async function run(){
           });
 
 
-
         //   advertise get data
-        app.get("/advertise-products", async (req, res) => {
-            // const email = req.params.email;
-            // console.log(email)
+        app.get("/advertise-products/:id", async (req, res) => {
+            const email = req.params.email;
+            console.log(email)
             const result = await allProduct
               .find({
                 // email: email,
@@ -166,6 +169,21 @@ async function run(){
               .toArray();
             res.send(result);
           });
+
+
+          //   advertise get data
+        // app.get("/advertise-products", async (req, res) => {
+        //     const email = req.params.email;
+        //     console.log(email)
+        //     const result = await allProduct
+        //       .find({
+        //         // email: email,
+        //         advertiseShow: true,
+        //         status: "available",
+        //       })
+        //       .toArray();
+        //     res.send(result);
+        //   });
 
 
 
@@ -201,9 +219,10 @@ async function run(){
             const email = req.params.email;
             const query = {email}
             const user = await usersCollections.findOne(query);
+         
        
-            const accountType = user.accountType
-            res.send(accountType);
+           
+            res.send(user);
         })
 
 
@@ -211,7 +230,7 @@ async function run(){
         
         // create a payment intent
         app.post('/create-payment-intent',async(req,res)=>{
-            const price = req.body.price.resalePrice
+            const price = req.body.seller_price;
             const amount = price * 100
             const paymentIntent = await stripe.paymentIntents.create({ 
             currency: "usd",
@@ -236,7 +255,7 @@ async function run(){
             // inject data in payment collectioon
             const id = payment.product_id
             const filter = {_id: ObjectId(id)}
-            const result = await paymentsCollection.insertOne(payment)  
+            const result = await paymentCollections.insertOne(payment)  
             const updatedDoc = {
                 $set:{
                     
@@ -254,8 +273,8 @@ async function run(){
                 sellStatus:"sold",
                 price : payment.price 
             }
-            const updatedProducts = await productsCollection.updateOne(filter,updatedDoc)
-        const updatedResult = await ordersCollection.insertOne(orders)      
+        //     const updatedProducts = await productsCollection.updateOne(filter,updatedDoc)
+        // const updatedResult = await ordersCollection.insertOne(orders)      
             res.send(result)
         })
 
@@ -279,6 +298,7 @@ app.listen(port, () => console.log(`byteCode velocity is running ${port}`))
 
 
 
-// "npm-start-dev": "nodemon index.js",
-// require('crypto').randomBytes(64).toString('hex')
 
+
+
+// pi_3M94OqK3PnW9JuEr0WSMhpWF :myTransactionId
