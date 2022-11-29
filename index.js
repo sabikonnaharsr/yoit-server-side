@@ -83,8 +83,15 @@ async function run(){
         app.get('/productDetails/:id', async(req, res) => {
             const id = req.params.id;
             const query = {_id: ObjectId(id)};
-            const result = await bookingsCollection.findOne(query);
+            const result = await allProduct.findOne(query);
             res.send(result);
+        })
+
+        app.get('/payment/bookings/:id', async(req, res) => {
+            const id = req.params.id;
+            const query = {_id: ObjectId(id)};
+            const result = await bookingsCollection.findOne(query);
+            res.send(result)
         })
 
 
@@ -217,7 +224,27 @@ async function run(){
             const email = req.params.email;
             const query = {email}
             const user = await usersCollections.findOne(query);   
-            res.send(user);
+            
+            res.send({isAdmin: user.accountType === "admin"});
+        })
+
+        // admin route
+        app.get('/users/buyer/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = {email}
+            const user = await usersCollections.findOne(query);   
+            
+            res.send({isBuyer: user.accountType === "buyer"});
+        })
+
+
+        // admin route
+        app.get('/users/seller/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = {email}
+            const user = await usersCollections.findOne(query);   
+            
+            res.send({isSeller: user.accountType === "seller"});
         })
 
    
@@ -326,7 +353,7 @@ async function run(){
                 $set:{
                     
                     status:"sold",
-                    advertise: false,
+                    advertiseShow: false,
                     paid: true,
 
                     
