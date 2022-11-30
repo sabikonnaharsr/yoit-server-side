@@ -40,14 +40,14 @@ async function run(){
 
        
         // jwt
-        //    app.get('/jwt', async(req, res) => {
-        //     const email = req.query.email;
-        //     const query = {email: email}
-        //    
-        //     const user = await usersCollection.findOne(query);
-        //     
-        //     res.send({accessToken: 'token'});
-        // })
+           app.get('/jwt', async(req, res) => {
+            const email = req.query.email;
+            const query = {email: email}
+           
+            const user = await usersCollections.findOne(query);
+            
+            res.send({accessToken: 'token'});
+        })
 
 
         // all product
